@@ -41,13 +41,13 @@ class MainActivity : AppCompatActivity() {
     fun initLayout() {
         viewModel.isListening.observe(this, Observer<Boolean> {
             if (it == true) {
-                buttonSpeach.text = "Stop"
+                buttonSpeech.text = "Stop"
             } else {
-                buttonSpeach.text = "Speach"
+                buttonSpeech.text = "Speech"
             }
         })
 
-        buttonSpeach.setOnClickListener {
+        buttonSpeech.setOnClickListener {
             if (viewModel.isListening.value == true) {
                 viewModel.stopListening()
             } else {
