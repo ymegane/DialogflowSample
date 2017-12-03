@@ -3,6 +3,7 @@ package com.github.ymegane.dialogflowsample
 import ai.api.AIConfiguration
 import ai.api.AIListener
 import ai.api.android.AIService
+import ai.api.model.AIResponse
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.MutableLiveData
@@ -13,6 +14,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val aiService by lazy { initAiService() }
 
     val isListening = MutableLiveData<Boolean>()
+    val response = MutableLiveData<AIResponse>()
 
     override fun onCleared() {
         super.onCleared()
@@ -45,6 +47,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val aiListener = object : AIListener {
         override fun onResult(result: ai.api.model.AIResponse) {
             Log.d("MainViewModel", "onResult ${result.result.fulfillment.speech}")
+            response.postValue(result)
         }
 
         override fun onListeningStarted() {
@@ -53,7 +56,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         override fun onAudioLevel(level: Float) {
-            Log.v("MainViewModel", "onAudioLevel")
+            Log.v("MainViewModel", "onAudioLevel $level")
         }
 
         override fun onError(error: ai.api.model.AIError) {

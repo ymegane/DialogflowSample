@@ -1,5 +1,6 @@
 package com.github.ymegane.dialogflowsample
 
+import ai.api.model.AIResponse
 import android.Manifest
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
@@ -45,6 +46,11 @@ class MainActivity : AppCompatActivity() {
             } else {
                 buttonSpeech.text = "Speech"
             }
+        })
+        viewModel.response.observe(this, Observer<AIResponse> {
+            it ?: return@Observer
+
+            textResponse.text = it.result.fulfillment.speech
         })
 
         buttonSpeech.setOnClickListener {
