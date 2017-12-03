@@ -10,13 +10,9 @@ import android.util.Log
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
-    private lateinit var aiService: AIService
+    private val aiService by lazy { initAiService() }
 
     val isListening = MutableLiveData<Boolean>()
-
-    init {
-        initAiConfig()
-    }
 
     override fun onCleared() {
         super.onCleared()
@@ -36,22 +32,23 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         aiService.cancel()
     }
 
-    private fun initAiConfig() {
+    private fun initAiService(): AIService {
         val config = ai.api.android.AIConfiguration(BuildConfig.CLIENT_ACCESS_TOKEN,
                 AIConfiguration.SupportedLanguages.Japanese,
                 ai.api.android.AIConfiguration.RecognitionEngine.System)
 
-        aiService = AIService.getService(getApplication(), config)
+        val aiService = AIService.getService(getApplication(), config)
         aiService.setListener(aiListener)
+        return aiService
     }
 
     private val aiListener = object : AIListener {
         override fun onResult(result: ai.api.model.AIResponse) {
-            Log.v("MainViewModel", "onResult ${result.result.source}")
+            Log.d("MainViewModel", "onResult ${result.result.fulfillment.speech}")
         }
 
         override fun onListeningStarted() {
-            Log.v("MainViewModel", "onListeningStarted")
+            Log.d("MainViewModel", "onListeningStarted")
             isListening.postValue(true)
         }
 
@@ -59,17 +56,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             Log.v("MainViewModel", "onAudioLevel")
         }
 
-        override fun onError(error: ai.api.model.AIError?) {
-            Log.v("MainViewModel", "onError")
+        override fun onError(error: ai.api.model.AIError) {
+            Log.w("MainViewModel", "onError ${error.message}")
         }
 
         override fun onListeningCanceled() {
-            Log.v("MainViewModel", "onListeningCanceled")
+            Log.d("MainViewModel", "onListeningCanceled")
             isListening.postValue(false)
         }
 
         override fun onListeningFinished() {
-            Log.v("MainViewModel", "onListeningFinished")
+            Log.d("MainViewModel", "onListeningFinished")
             isListening.postValue(false)
         }
 
