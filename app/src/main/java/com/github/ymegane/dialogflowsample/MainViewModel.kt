@@ -8,9 +8,10 @@ import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.MutableLiveData
 import android.util.Log
+import com.stfalcon.chatkit.utils.DateFormatter
+import java.util.*
 
-class MainViewModel(application: Application) : AndroidViewModel(application) {
-
+class MainViewModel(application: Application) : AndroidViewModel(application), DateFormatter.Formatter {
     private val aiService by lazy { initAiService() }
 
     val isListening = MutableLiveData<Boolean>()
@@ -20,6 +21,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         super.onCleared()
 
         aiService.cancel()
+    }
+
+    override fun format(date: Date?): String {
+        return when {
+            DateFormatter.isToday(date) -> DateFormatter.format(date, DateFormatter.Template.TIME)
+            DateFormatter.isYesterday(date) -> "MM/DD HH:mm"
+            DateFormatter.isCurrentYear(date) -> DateFormatter.format(date, DateFormatter.Template.STRING_DAY_MONTH)
+            else -> DateFormatter.format(date, DateFormatter.Template.STRING_DAY_MONTH_YEAR)
+        }
     }
 
     fun startListening() {

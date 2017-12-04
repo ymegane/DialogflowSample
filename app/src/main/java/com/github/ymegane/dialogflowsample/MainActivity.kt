@@ -7,6 +7,11 @@ import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
+import com.github.ymegane.dialogflowsample.model.RecognizedMessage
+import com.github.ymegane.dialogflowsample.model.AuthorMessage
+import com.stfalcon.chatkit.commons.ImageLoader
+import com.stfalcon.chatkit.commons.models.IMessage
+import com.stfalcon.chatkit.messages.MessagesListAdapter
 import kotlinx.android.synthetic.main.activity_main.*
 import permissions.dispatcher.NeedsPermission
 import permissions.dispatcher.OnNeverAskAgain
@@ -18,6 +23,10 @@ import permissions.dispatcher.RuntimePermissions
 class MainActivity : AppCompatActivity() {
 
     private val viewModel by lazy { ViewModelProviders.of(this).get(MainViewModel::class.java) }
+
+    private val messageAdapter = MessagesListAdapter<IMessage>("author", ImageLoader { imageView, url ->
+        // TODO
+    })
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,7 +59,8 @@ class MainActivity : AppCompatActivity() {
         viewModel.response.observe(this, Observer<AIResponse> {
             it ?: return@Observer
 
-            textResponse.text = it.result.fulfillment.speech
+            messageAdapter.addToStart(AuthorMessage(it), true)
+            messageAdapter.addToStart(RecognizedMessage(it), true)
         })
 
         buttonSpeech.setOnClickListener {
@@ -60,6 +70,9 @@ class MainActivity : AppCompatActivity() {
                 viewModel.startListening()
             }
         }
+
+        messageAdapter.setDateHeadersFormatter(viewModel)
+        messagesList.setAdapter(messageAdapter)
     }
 
     @OnPermissionDenied(Manifest.permission.RECORD_AUDIO)
